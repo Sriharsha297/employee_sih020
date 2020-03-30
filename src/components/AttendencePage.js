@@ -1,3 +1,6 @@
+
+/*global google*/
+
 import React from 'react';
 import { withStyles, Typography, Paper, Button, Divider, TextField} from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
@@ -7,9 +10,15 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ResultDialog from "../components/ResultDialog";
 import { Redirect } from "react-router-dom";
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import Axios from 'axios';
+import swal from 'sweetalert';
+import queryString from 'query-string'
+
+const googleMapURL = `https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&key=AIzaSyBTHrx8pxJEFfVSVHjFVM7e2YS8ZbNqECU`;
 
 
-
+const branchName = "hyd"
+const empId = "9100427531"
 
 
 const styles = theme => ({
@@ -76,24 +85,100 @@ class AttendencePage extends React.Component
         }
     }
     componentDidMount(){
-        setTimeout(() =>{
-            this.setState({condition_1:true,condition_2:true,condition_3:true,condition_4:true});
-        },2000);
+        const values = queryString.parse(this.props.location.search)
+        let lat = values.lat;
+        let lng = values.lng;
+        var validTime = this.validTime();
+        var validDate = !this.checkHoliday();
+    
+
+        Axios.get(`http://localhost:8080/employee/getConditions?branchName=${branchName}&empId=${empId}`)
+        .then((res) => {
+            if(!res.data.ok[0]){
+                swal("Oops!", "Google Fence is not yet Created. Contact Your HR!", "error")
+                .then(() => {
+                    this.setState({submitted:true})
+                })
+            }
+            var lastSubmitted = res.data.lastSubmitted
+            console.log(lastSubmitted);
+            var date = new Date();
+            var today = date.getDate()
+            const polygon = new google.maps.Polygon({
+                      paths: res.data.ok[0].fence,
+            });
+            const currentPosition = new google.maps.LatLng(lat, lng);
+            var insideFence = google.maps.geometry.poly
+            .containsLocation(currentPosition, polygon);
+            var condition_4 = (today != lastSubmitted);
+            this.setState({condition_1:insideFence,condition_2:validDate,condition_3:validTime,condition_4})
+        })
+        .catch(err =>{
+            console.log(err)
+        })
+        // setTimeout(() =>{
+        //     this.setState({condition_1:true,condition_2:true,condition_3:true,condition_4:true});
+        // },2000);
     }
+
+      validTime = () => {
+        var startTime = '0:00:10';
+        var endTime = '24:00:00';
+        var currentDate = new Date()   
+        
+        var startDate = new Date(currentDate.getTime());
+        startDate.setHours(startTime.split(":")[0]);
+        startDate.setMinutes(startTime.split(":")[1]);
+        startDate.setSeconds(startTime.split(":")[2]);
+        
+        var endDate = new Date(currentDate.getTime());
+        endDate.setHours(endTime.split(":")[0]);
+        endDate.setMinutes(endTime.split(":")[1]);
+        endDate.setSeconds(endTime.split(":")[2]);
+        
+        
+        var valid = startDate < currentDate && endDate > currentDate
+        return valid;
+      }
+
+      checkHoliday = () => {
+        var holidays = ["1-1","12-2","26-1","21-2","25-3"];
+        var date = new Date();
+        var dd = date.getDate();
+        var mm = date.getMonth()+1;
+        var day = date.getDay()
+        var newDate = dd+"-"+mm;
+        if(holidays.indexOf(newDate) >= 0 || day == 0){
+          return true;
+        }
+        return false;
+      }
 
     handleDialogClose = ()=> {
         this.setState({ open: false,message:'true',submitted:true });
     }
+
     handleAttendenceSubmit = (e) =>{
         e.preventDefault();
-        this.setState({open:true})
-        setTimeout(()=>{
-            this.setState({message:"Success"})
-
-        },1000)
+        
+        Axios.post(`http://localhost:8080/employee/submitAttendance?branchName=${branchName}&empId=${empId}`)
+        .then((ok) => {
+            swal({
+                title: "Submitted",
+                icon: "success",
+                button: "Okay",
+              }).then(() =>{
+                this.setState({submitted:true})
+              })
+        })
+        .catch(err => {
+            swal("Oops!", "Something went wrong! Please try again later!", "error")
+        })
     }
     render(){
         const { classes } = this.props;
+        // const values = queryString.parse(this.props.location.search)
+        // console.log(values) // "top"
         if(this.state.submitted){
             return <Redirect to='/home'/>
         }

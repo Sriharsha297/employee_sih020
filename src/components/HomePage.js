@@ -42,6 +42,38 @@ const styles = theme => ({
 
 class HomePage extends React.Component
 {
+    constructor(props){
+        super(props);
+        this.state= {
+            lat : "",
+            lng : ""
+
+        }
+    }
+    componentDidMount(){
+        this.watchLocation();
+    }
+
+    watchLocation() {
+        if ('geolocation' in navigator) {
+          const geoOptions = {
+            enableHighAccuracy: true,
+            maximumAge : 30000,
+            timeout : 27000
+          };
+    
+          navigator.geolocation.getCurrentPosition(this.getLocation.bind(this), null, geoOptions);
+        } else {
+          alert('Geolocation is not supported by this browser.');
+        }
+      }
+      getLocation(position) {
+        this.setState({
+        
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+        });
+      }
     render(){
         const { classes } = this.props;
         
@@ -58,7 +90,7 @@ class HomePage extends React.Component
                         <Typography variant="h5" gutterBottom={true}>
                                 SUBMIT ATTENDENCE
                         </Typography>
-                        <Button component={Link} to={'/attendence'} variant='outlined'>
+                        <Button component={Link} to={`/attendence?lat=${this.state.lat}&lng=${this.state.lng}`} variant='outlined'>
                             Click Here<NavigateNextIcon/>
                         </Button>
                     </Paper>

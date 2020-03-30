@@ -22,7 +22,6 @@ class ResultDialog extends React.Component {
   render() {
     //const { fullScreen } = this.props;
     const {handleDialogClose,open,message} = this.props;
-    console.log("why",message,"open",open);
     return (
         <Dialog
             fullWidth={this.state.fullWidth}
