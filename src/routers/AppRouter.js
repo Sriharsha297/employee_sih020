@@ -7,6 +7,8 @@ import PageNotFound from "../components/NotFoundPage";
 import Footer from "../components/Footer";
 import LeaveForm from "../components/LeaveForm";
 import AttendencePage from "../components/AttendencePage";
+import TrackAttendance from '../components/TrackAttendance';
+import LeaveHistory from '../components/LeaveHistory';
 
 
 const AppRouter = () => (
@@ -19,6 +21,8 @@ const AppRouter = () => (
                 <Route path="/home" exact component={HomePage} />
                 <Route path="/apply-leave" exact component={LeaveForm} />
                 <Route path="/attendence" exact component={AttendencePage}/>
+                <Route path="/track-attendance" exact component={TrackAttendance}/>
+                <Route path="/leave-history" exact component={LeaveHistory}/>
                 <Route component={PageNotFound} />
             </Switch>
         <Footer/>

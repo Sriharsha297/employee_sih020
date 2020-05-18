@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import axios from "axios";
+import Axios from "axios";
 import Divider from '@material-ui/core/Divider';
 import { Redirect } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import swal from "sweetalert";
 
 const styles = theme => ({
     main: {
@@ -51,38 +52,36 @@ class LoginPage extends React.Component {
 
     handleLoginSubmit(e) {
         e.preventDefault();
-        const username = e.target.elements.username.value.trim();
+        const empId = e.target.elements.username.value.trim();
         const password = e.target.elements.password.value.trim();
        
             const loginObj = {
-                username,
+                empId,
                 password
             }
-            // axios.post('https://grievance-portal-server-1.herokuapp.com/api/official/auth/login',loginObj)
-            //     .then((response) => {    
-            //         localStorage.setItem('token',response.data.token)
-            //         this.props.dispatch(login(response.data.user));
-            //         this.setState({ isAuthorised: true })
-            //     })
-            //     .catch((error) => {
-            //         if (error.response) {
-            //             // The request was made and the server responded with a status code
-            //             // that falls out of the range of 2xx
-            //             console.log(error.response.data.message);
-            //             console.log(error.response.status);
-            //             this.setState({error:error.response.data.message});
-            //         }
-            //         console.log(`Error : ${error}`);
-            //     })
-            //    ;
-    }
+            Axios.post(`http://localhost:8080/employee/login`,loginObj)
+                .then((response) => {
+                    console.log(response.data)
+                    localStorage.setItem('name',response.data.employee.name);
+                    localStorage.setItem('empId',response.data.employee.empId);
+                    localStorage.setItem('branch',response.data.employee.branch);
+                    localStorage.setItem('token',response.data.token);
+                    this.setState({isAuthorised:true})
+                })
+                .catch((error)=>{
+                    console.log(error);
+                    if (error.response.status == 400) {
+                    swal("Invalid Credentials!","","error")
+                    }
+                });
+                }
     render() {
         const { classes } = this.props;
         if (this.state.isAuthorised) {
-            return <Redirect to="/official" />
+            return <Redirect to="/home" />
         }
         if(!!localStorage.getItem('token')){
-            return <Redirect to='/official'/>
+            return <Redirect to='/home'/>
         }
         return (
             <div className={classes.main}>

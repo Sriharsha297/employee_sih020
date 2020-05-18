@@ -13,12 +13,13 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Axios from 'axios';
 import swal from 'sweetalert';
 import queryString from 'query-string'
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
 const googleMapURL = `https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&key=AIzaSyBTHrx8pxJEFfVSVHjFVM7e2YS8ZbNqECU`;
 
 
-const branchName = "hyd"
-const empId = "9100427531"
+const branchName = localStorage.getItem('branch');
+const empId = localStorage.getItem('empId');
 
 
 const styles = theme => ({
@@ -64,6 +65,9 @@ const styles = theme => ({
         paddingBottom :theme.spacing.unit,
         marginTop: theme.spacing.unit,
         marginBottom: theme.spacing.unit,
+    },
+    btn: {
+        margin: theme.spacing.unit*2
     }
 
 });
@@ -88,11 +92,18 @@ class AttendencePage extends React.Component
         const values = queryString.parse(this.props.location.search)
         let lat = values.lat;
         let lng = values.lng;
+        
+
         var validTime = this.validTime();
         var validDate = !this.checkHoliday();
-    
-
-        Axios.get(`http://localhost:8080/employee/getConditions?branchName=${branchName}&empId=${empId}`)
+        
+        const branchName = localStorage.getItem('branch');
+        const empId = localStorage.getItem('empId');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        Axios.get(`http://localhost:8080/employee/getConditions?branchName=${branchName}&empId=${empId}`,{headers:headers})
         .then((res) => {
             if(!res.data.ok[0]){
                 swal("Oops!", "Google Fence is not yet Created. Contact Your HR!", "error")
@@ -101,7 +112,6 @@ class AttendencePage extends React.Component
                 })
             }
             var lastSubmitted = res.data.lastSubmitted
-            console.log(lastSubmitted);
             var date = new Date();
             var today = date.getDate()
             const polygon = new google.maps.Polygon({
@@ -116,9 +126,6 @@ class AttendencePage extends React.Component
         .catch(err =>{
             console.log(err)
         })
-        // setTimeout(() =>{
-        //     this.setState({condition_1:true,condition_2:true,condition_3:true,condition_4:true});
-        // },2000);
     }
 
       validTime = () => {
@@ -148,7 +155,7 @@ class AttendencePage extends React.Component
         var mm = date.getMonth()+1;
         var day = date.getDay()
         var newDate = dd+"-"+mm;
-        if(holidays.indexOf(newDate) >= 0 || day == 0){
+        if(holidays.indexOf(newDate) >= 0 ){
           return true;
         }
         return false;
@@ -160,8 +167,13 @@ class AttendencePage extends React.Component
 
     handleAttendenceSubmit = (e) =>{
         e.preventDefault();
-        
-        Axios.post(`http://localhost:8080/employee/submitAttendance?branchName=${branchName}&empId=${empId}`)
+        const branchName = localStorage.getItem('branch');
+        const empId = localStorage.getItem('empId');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        Axios.post(`http://localhost:8080/employee/submitAttendance?branchName=${branchName}&empId=${empId}`,null,{headers:headers})
         .then((ok) => {
             swal({
                 title: "Submitted",
@@ -184,12 +196,15 @@ class AttendencePage extends React.Component
         }
         return (
             <Paper className={classes.root}>
+                <Button onClick = {() => {this.setState({submitted:true})}} className={classes.btn}>
+                    <ArrowBackIosIcon />Go Back
+                </Button>
+                <Divider/>
                 <ResultDialog handleDialogClose={this.handleDialogClose} open={this.state.open}  message={this.state.message}/>
                 <form className={classes.form} onSubmit ={this.handleAttendenceSubmit}>
                     <Typography color='secondary' component="h1" variant="h5">
                                     ATTENDENCE PAGE
                     </Typography>
-                    <Divider/>
                     <div className ={classes.paper} >
                                 <Typography variant="h6" color="primary">
                                     Please Wait

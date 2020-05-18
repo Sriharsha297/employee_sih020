@@ -106,9 +106,19 @@ class HomePage extends React.Component
                     </Paper>
                     <Paper className={classes.paper} elevation={8} >
                         <Typography variant="h5" gutterBottom={true}>
+                                LEAVE HISTORY
+                        </Typography>
+                        
+                    
+                        <Button component ={Link} to={'/leave-history'} variant='outlined'>
+                            Click Here<NavigateNextIcon/>
+                        </Button>
+                    </Paper>
+                    <Paper className={classes.paper} elevation={8} >
+                        <Typography variant="h5" gutterBottom={true}>
                                 TRACK ATTENDENCE
                         </Typography>
-                        <Button variant='outlined'>
+                        <Button component ={Link} to={'/track-attendance'} variant='outlined'>
                             Click Here<NavigateNextIcon/>
                         </Button>
                     </Paper>

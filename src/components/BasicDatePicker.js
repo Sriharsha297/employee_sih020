@@ -3,7 +3,7 @@ import { DatePicker } from "@material-ui/pickers";
 
 function BasicDatePicker(props) {
   const [selectedDate, handleDateChange] = useState(new Date());
-
+  const {handleDateSelect} = props;
   return (
     <Fragment>
       <DatePicker
@@ -13,7 +13,10 @@ function BasicDatePicker(props) {
         animateYearScrolling
         disablePast
         value={selectedDate}
-        onChange={handleDateChange}
+        onChange={val =>{
+          handleDateSelect(val);
+          handleDateChange(val);
+        }}
       />
     </Fragment>
   );

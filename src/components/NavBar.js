@@ -11,6 +11,8 @@ import VisibilityIcon from '@material-ui/icons/VisibilityOutlined';
 import PersonIcon from '@material-ui/icons/Person';
 import GroupIcon from '@material-ui/icons/Group';
 import MailIcon from '@material-ui/icons/Mail';
+import Axios from 'axios';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 // import UserMenu from './UserMenu';
 
 const DRAWER_WIDTH = 240;
@@ -82,14 +84,14 @@ class Navbar extends React.Component {
     render() {
         const {classes, theme, history, loggedIn} = this.props;
 
-        const icons = [<HomeIcon/>, <InfoIcon/>, <VisibilityIcon/>, <HelpIcon/>, <MailIcon/>];
-        let hide = [ true, true, !loggedIn, true, true,loggedIn ];
+        const icons = [<HomeIcon/>, <ExitToAppIcon/>];
+        let hide = [ true, true ];
 
         const drawer = (
             <div className={classes.toolbar} >
                 <List>
                     {
-                        ['Home', 'About us', 'View status', 'Help', 'Contact us','Logout'].map( (text, index) => (
+                        ['Home', 'Logout'].map( (text, index) => (
                             hide[index] &&
                             <ListItem button onClick={ () => this.handleRedirection(index, history) } key={text}>
                                 <ListItemIcon> { icons[index] } </ListItemIcon>
@@ -114,8 +116,33 @@ class Navbar extends React.Component {
                         >
                             <MenuIcon />
                         </IconButton>
-                        iugu
-                        
+                        NYKS EMPLOYEE
+                        {
+                            true   &&
+                            <div style={{marginLeft: 'auto'}}>
+                                <Button
+                                    color="inherit"
+                                    aria-haspopup="true"
+                                    onClick = {this.handleLogout}
+                                >
+                                    <Typography color="inherit" variant="subtitle2" onClick = {() =>{
+                                        const headers = {
+                                            'Content-Type': 'application/json',
+                                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                                        }
+                                        Axios.post(`http://localhost:8080/employee/logout`,null,{headers:headers})
+                                        .then(()=>{
+                                            console.log("Successfully logged out!");
+                                        })
+                                        localStorage.clear();
+                                        this.props.history.push('/')
+                                         
+                                    }}>
+                                        LOGOUT
+                                    </Typography>
+                                </Button>
+                            </div>
+                        }
 
                         {/* <UserMenu /> */}
 
