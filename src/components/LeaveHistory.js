@@ -5,7 +5,6 @@ import {Button,Grid,Typography,Divider,Card,CardContent,CardActions,withStyles,P
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
 
-const empId = "9100427531";
 
 const styles = theme => ({
   main: {
@@ -58,6 +57,7 @@ class LeaveHistory extends React.Component {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer ' + localStorage.getItem('token')
   }
+  const empId = localStorage.getItem('empId');
   Axios.get(`http://localhost:8080/employee/leaveHistory?empId=${empId}`,{headers:headers})
     .then((response) => {
       this.setState({leaves:response.data.array})
